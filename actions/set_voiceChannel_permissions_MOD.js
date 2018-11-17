@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Find Webhook",
+name: "Set Voice Channel Perms",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,19 @@ name: "Find Webhook",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Webhook Control",
+section: "Channel Control",
+
+//---------------------------------------------------------------------
+// Action Subtitle
+//
+// This function generates the subtitle displayed next to the name.
+//---------------------------------------------------------------------
+
+subtitle: function(data) {
+    const names = ['Command Author\'s Voice Ch.', 'Mentioned User\'s Voice Ch.', 'Default Voice Channel', 'Temp Variable', 'Server Variable', 'Global Variable'];
+	const index = parseInt(data.storage);
+	return index < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
+},
 
 //---------------------------------------------------------------------
 // DBM Mods Manager Variables (Optional but nice to have!)
@@ -24,43 +36,18 @@ section: "Webhook Control",
 //---------------------------------------------------------------------
 
 // Who made the mod (If not set, defaults to "DBM Mods")
-author: "Lasse",
+author: "EliteArtz",
 
 // The version of the mod (Defaults to 1.0.0)
-version: "1.8.7", //Added in 1.8.7
-
-//1.8.7: Changed dropdown texts!
+version: "1.8.4",
 
 // A short description to show on the mod line for this mod (Must be on a single line)
-short_description: "Finds a Webhook and Stores it.",
+short_description: "Sets the Permission of a Voice Channel.",
 
-// If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
-
-
-//---------------------------------------------------------------------
+	 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
 
-//---------------------------------------------------------------------
-// Action Subtitle
-//
-// This function generates the subtitle displayed next to the name.
-//---------------------------------------------------------------------
-
-subtitle: function(data) {
-	return `${data.id}`;
-},
-
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
-
-variableStorage: function(data, varType) {
-	const type = parseInt(data.storage);
-	if(type !== varType) return;
-	return ([data.varName, 'Webhook']);
-},
+	 //---------------------------------------------------------------------
 
 //---------------------------------------------------------------------
 // Action Fields
@@ -70,47 +57,57 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["id", "token", "storage", "varName"],
+fields: ["storage", "varName", "permission", "state"],
 
 //---------------------------------------------------------------------
 // Command HTML
 //
 // This function returns a string containing the HTML used for
-// editting actions.
+// editting actions. 
 //
 // The "isEvent" parameter will be true if this action is being used
-// for an event. Due to their nature, events lack certain information,
+// for an event. Due to their nature, events lack certain information, 
 // so edit the HTML to reflect this.
 //
-// The "data" parameter stores constants for select elements to use.
+// The "data" parameter stores constants for select elements to use. 
 // Each is an array: index 0 for commands, index 1 for events.
-// The names are: sendTargets, members, roles, channels,
+// The names are: sendTargets, members, roles, channels, 
 //                messages, servers, variables
 //---------------------------------------------------------------------
 
 html: function(isEvent, data) {
-	return `
-<div><p><u>Mod Info:</u><br>Created by Lasse!</p></div><br><br>
+    return `
+	<div>
+	  <p>
+		  <u>Mod Info:</u><br>
+			Created by EliteArtz
+		</p>
+	</div><br>
 <div>
-	<div style="float: left; width: 40%;">
-		Webhook ID:<br>
-		<input id="id" class="round" type="text">
+	<div style="float: left; width: 45%;">
+		Source Voice Channel:<br>
+		<select id="storage" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
+			${data.voiceChannels[isEvent ? 1 : 0]}
+		</select>
 	</div>
-	<div style="float: right; width: 55%;">
-		Webhook Token:<br>
-		<input id="token" class="round" type="text">
+	<div id="varNameContainer" style="padding-left: 5%; float: left; width: 55%;">
+		Variable Name:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
 </div><br><br><br>
 <div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store In:<br>
-		<select id="storage" class="round">
-			${data.variables[1]}
+	<div style="float: left; width: 45%;">
+		Permission:<br>
+		<select id="permission" class="round">
+			${data.permissions[newFunction_1()]}
 		</select>
 	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
-		Variable Name:<br>
-		<input id="varName" class="round" type="text">
+	<div style="padding-left: 5%; float: left; width: 55%;">
+		Change To:<br>
+		<select id="state" class="round">
+			<option value="0" selected>Allow</option>
+			<option value="1">Disallow</option>
+		</select>
 	</div>
 </div>`
 },
@@ -124,29 +121,39 @@ html: function(isEvent, data) {
 //---------------------------------------------------------------------
 
 init: function() {
+	const {glob, document} = this;
+
+	glob.channelChange(document.getElementById('storage'), 'varNameContainer');
 },
 
 //---------------------------------------------------------------------
 // Action Bot Function
 //
 // This is the function for the action within the Bot's Action class.
-// Keep in mind event calls won't have access to the "msg" parameter,
+// Keep in mind event calls won't have access to the "msg" parameter, 
 // so be sure to provide checks for variable existance.
 //---------------------------------------------------------------------
 
 action: function(cache) {
-	const Discord = require('discord.js');
 	const data = cache.actions[cache.index];
-	const id = this.evalMessage(data.id, cache);
-	const token = this.evalMessage(data.token, cache);
-
-	var result = new Discord.WebhookClient(id, token);
-
-	if(result !== undefined) {
-		const storage = parseInt(data.storage);
-		const varName = this.evalMessage(data.varName, cache);
-		this.storeValue(result, storage, varName, cache);
+	const server = cache.server;
+	if(!server) {
 		this.callNextAction(cache);
+		return;
+	}
+	const storage = parseInt(data.storage);
+	const varName = this.evalMessage(data.varName, cache);
+	const channel = this.getChannel(storage, varName, cache);
+	const options = {};
+	options[data.permission] = Boolean(data.state === "0");
+	if(Array.isArray(channel)) {
+		this.callListFunc(channel, 'overwritePermissions', [server.id, options]).then(function() {
+			this.callNextAction(cache);
+		}.bind(this));
+	} else if(channel && channel.overwritePermissions) {
+		channel.overwritePermissions(server.id, options).then(function() {
+			this.callNextAction(cache);
+		}.bind(this)).catch(this.displayError.bind(this, data, cache));
 	} else {
 		this.callNextAction(cache);
 	}
@@ -165,3 +172,7 @@ mod: function(DBM) {
 }
 
 }; // End of module
+
+function newFunction_1() {
+    return 1;
+}

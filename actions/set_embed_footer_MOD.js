@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Changelog",
+name: "Set Embed Footer",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Changelog",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "#Mod Information",
+section: "Embed Message",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,7 @@ section: "#Mod Information",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `Does nothing - Click "Edit" for more information`;
+	return `${data.message}`;
 },
 
 //---------------------------------------------------------------------
@@ -34,26 +34,18 @@ subtitle: function(data) {
 	 //---------------------------------------------------------------------
 
 	 // Who made the mod (If not set, defaults to "DBM Mods")
-	 author: "DBM Mods",
+	 author: "Lasse",
 
 	 // The version of the mod (Defaults to 1.0.0)
-	 version: "1.8.7",
+	 version: "1.8.2",
 
 	 // A short description to show on the mod line for this mod (Must be on a single line)
-	 short_description: "Changelog overview",
+	 short_description: "You can add a footer with text and an image to an embed message",
 
 	 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
 
 	 //---------------------------------------------------------------------
-
-//---------------------------------------------------------------------
-// Action Storage Function
-//
-// Stores the relevant variable info for the editor.
-//---------------------------------------------------------------------
-
-//variableStorage: function(data, varType) {},
 
 //---------------------------------------------------------------------
 // Action Fields
@@ -63,7 +55,7 @@ subtitle: function(data) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: [],
+fields: ["storage", "varName", "message", "footerIcon"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -83,75 +75,31 @@ fields: [],
 
 html: function(isEvent, data) {
 	return `
+	<div>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by Lasse!
+		</p>
+	</div><br>
 <div>
-<div id ="wrexdiv" style="width: 550px; height: 350px; overflow-y: scroll;">
-	<p>
-		<h2>1.8.7: All your wishes except Await Response</h2>
-		● Google & YouTube Search!<br>
-		● Set the channel category in Edit Channel!<br>
-		● Webhooks!<br>
-		● Store the total amount of commands and events!<br>
-		● Merged "Start & Stop Typing"!<br>
-		● Added "File Control" which includes "Create", "Write", "Append" and "Delete" File!<br>
-		● "Find Text" allows it to find a word in a text!<br>
-		● Convert Timestamp!<br>
-		● Store Weather Informations!<br>
-		● Revise and Replace Mods!<br>
-		● Many bug fixes....
-	</p>
-	<p>
-		<h2>1.8.6: So many small new mods</h2>
-		● Check Variable length<br>
-		● HTML and Json fixes<br>
-		● Generate Random Hex Color<br>
-		● Change images name<br>
-		● Delete File<br>
-		● Cleverbot .io & .com support<br>
-		● Randomize Letters<br>
-		● Slice variable<br>
-		● Translate variable<br>
-		● Store Attachment Info<br>
-		● Convert YouTube Time<br>
-		... and much more!
-	</p>
-	<p>
-		<h2>1.8.5: Many new options...</h2>
-		● Store Human & Bot count!<br>
-		● Json WebAPI with sliders and bug fixes!<br>
-		● New Mod Information in DBM!<br>
-		● Little text changes!<br>
-		● Sorted many action options!<br>
-		● Find Message!<br>
-		● Merged Store Role Info!<br>
-		● Refreshing uptimes (1h:27m:10s or 1:27:10 or...)!<br>
-		● Store Bots platform OS & Bots directory!<br>
-		● Store CPU usage in MB & Memory usage in MB!<br>
-		● Removed deprecated files from 1.8.4!<br>
-		● Store and parse XML -> You can store data from (nearly) every website!<br>
-	</p>
-	<p>
-		<h2>1.8.4: Set Prefix + Write File + Jump to Action</h2>
-		● Set Voice Channel Permissions<br>
-		● Write File (Creates a real file like a txt file)<br>
-		● Set Prefix (Global)<br>
-		● Jump to Action<br>
-		● Merged all Store Bot Client Info mods (Check info below)<br>
-		● Merged all Store Server Things mods (Check info below)<br>
-		● Reduced file size (We removed some obsolete modules 150 MB -> 330 KB)<br>
-		● Bug and typo fixes<br>
-		● Removed the music and discord.js fix because it is in beta fixed<br>
-		The merged actions are still usable but are located in the deprecated section. All functions are copied info the main action.
-	</p>
-	<p>
-		<h2>1.8.3: Category & Watching Netflix & Bot learned writing & Music Fix</h2>
-		● Create Category<br>
-		● Set Bot Activity (Playing, Watching, Listening & Streaming)<br>
-		● Start Bot Typing & Stop Bot Typing (Allows the bot to get the typing status)<br>
-		● Store Memory Usage<br>
-		● DBM Beta Music Stuff fix action (Check the video)<br>
-		● Update discord.js (Check the video)<br>
-		● Bug fixes<br>
-		● https://youtu.be/mrrtj5nlV58
+	<div style="float: left; width: 35%;">
+		Source Embed Object:<br>
+		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
+			${data.variables[1]}
+		</select>
+	</div>
+	<div id="varNameContainer" style="float: right; width: 60%;">
+		Variable Name:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
+	</div>
+</div><br><br><br>
+<div style="padding-top: 8px;">
+	Footer:<br>
+	<textarea id="message" rows="3" placeholder="Insert footer here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
+</div><br>
+<div style="float: left; width: 99%;">
+	Footer Icon URL:<br>
+	<input id="footerIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>`
 },
 
@@ -163,7 +111,11 @@ html: function(isEvent, data) {
 // functions for the DOM elements.
 //---------------------------------------------------------------------
 
-init: function() {},
+init: function() {
+	const {glob, document} = this;
+
+	glob.refreshVariableList(document.getElementById('storage'));
+},
 
 //---------------------------------------------------------------------
 // Action Bot Function
@@ -173,7 +125,18 @@ init: function() {},
 // so be sure to provide checks for variable existance.
 //---------------------------------------------------------------------
 
-action: function(cache) {},
+action: function(cache) {
+	const data = cache.actions[cache.index];
+	const storage = parseInt(data.storage);
+	const varName = this.evalMessage(data.varName, cache);
+	const embed = this.getVariable(storage, varName, cache);
+	const message = parseInt(data.message);
+	const footerIcon = parseInt(data.footerIcon);
+	if(embed && embed.setFooter) {
+		embed.setFooter(this.evalMessage(data.message, cache), this.evalMessage(data.footerIcon, cache));
+	}
+	this.callNextAction(cache);
+},
 
 //---------------------------------------------------------------------
 // Action Bot Mod

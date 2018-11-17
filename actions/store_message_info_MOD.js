@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Changelog",
+name: "Store Message Things",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Changelog",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "#Mod Information",
+section: "Messaging",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,9 @@ section: "#Mod Information",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `Does nothing - Click "Edit" for more information`;
+	const message = ['Command Message', 'Temp Variable', 'Server Variable', 'Global Variable'];
+	const info = ['Message edited at', 'Message edits history', 'Message is pinnable?', 'Message includes @everyone mention?', 'Messages different reactions count', 'Mentioned users list', 'Mentioned users count'];
+	return `${message[parseInt(data.message)]} - ${info[parseInt(data.info)]}`;
 },
 
 //---------------------------------------------------------------------
@@ -34,13 +36,13 @@ subtitle: function(data) {
 	 //---------------------------------------------------------------------
 
 	 // Who made the mod (If not set, defaults to "DBM Mods")
-	 author: "DBM Mods",
+	 author: "Lasse",
 
 	 // The version of the mod (Defaults to 1.0.0)
-	 version: "1.8.7",
+	 version: "1.8.2",
 
 	 // A short description to show on the mod line for this mod (Must be on a single line)
-	 short_description: "Changelog overview",
+	 short_description: "Stores Messages Information",
 
 	 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
@@ -53,7 +55,36 @@ subtitle: function(data) {
 // Stores the relevant variable info for the editor.
 //---------------------------------------------------------------------
 
-//variableStorage: function(data, varType) {},
+variableStorage: function(data, varType) {
+	const type = parseInt(data.storage);
+	if(type !== varType) return;
+	const info = parseInt(data.info);
+	let dataType = 'Unknown Type';
+	switch(info) {
+		case 0:
+			dataType = "Date";
+			break;
+		case 1:
+			dataType = "Array";
+			break;
+		case 2:
+			dataType = "Boolean";
+			break;
+		case 3:
+			dataType = "Boolean";
+			break;
+		case 4:
+			dataType = "Number";
+			break;
+		case 5:
+			dataType = "Array";
+			break;
+		case 6:
+			dataType = "Number";
+			break;
+	}
+	return ([data.varName2, dataType]);
+},
 
 //---------------------------------------------------------------------
 // Action Fields
@@ -63,7 +94,7 @@ subtitle: function(data) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: [],
+fields: ["message", "varName", "info", "storage", "varName2"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -83,75 +114,49 @@ fields: [],
 
 html: function(isEvent, data) {
 	return `
+	<div>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by Lasse!
+		</p>
+	</div><br>
 <div>
-<div id ="wrexdiv" style="width: 550px; height: 350px; overflow-y: scroll;">
-	<p>
-		<h2>1.8.7: All your wishes except Await Response</h2>
-		● Google & YouTube Search!<br>
-		● Set the channel category in Edit Channel!<br>
-		● Webhooks!<br>
-		● Store the total amount of commands and events!<br>
-		● Merged "Start & Stop Typing"!<br>
-		● Added "File Control" which includes "Create", "Write", "Append" and "Delete" File!<br>
-		● "Find Text" allows it to find a word in a text!<br>
-		● Convert Timestamp!<br>
-		● Store Weather Informations!<br>
-		● Revise and Replace Mods!<br>
-		● Many bug fixes....
-	</p>
-	<p>
-		<h2>1.8.6: So many small new mods</h2>
-		● Check Variable length<br>
-		● HTML and Json fixes<br>
-		● Generate Random Hex Color<br>
-		● Change images name<br>
-		● Delete File<br>
-		● Cleverbot .io & .com support<br>
-		● Randomize Letters<br>
-		● Slice variable<br>
-		● Translate variable<br>
-		● Store Attachment Info<br>
-		● Convert YouTube Time<br>
-		... and much more!
-	</p>
-	<p>
-		<h2>1.8.5: Many new options...</h2>
-		● Store Human & Bot count!<br>
-		● Json WebAPI with sliders and bug fixes!<br>
-		● New Mod Information in DBM!<br>
-		● Little text changes!<br>
-		● Sorted many action options!<br>
-		● Find Message!<br>
-		● Merged Store Role Info!<br>
-		● Refreshing uptimes (1h:27m:10s or 1:27:10 or...)!<br>
-		● Store Bots platform OS & Bots directory!<br>
-		● Store CPU usage in MB & Memory usage in MB!<br>
-		● Removed deprecated files from 1.8.4!<br>
-		● Store and parse XML -> You can store data from (nearly) every website!<br>
-	</p>
-	<p>
-		<h2>1.8.4: Set Prefix + Write File + Jump to Action</h2>
-		● Set Voice Channel Permissions<br>
-		● Write File (Creates a real file like a txt file)<br>
-		● Set Prefix (Global)<br>
-		● Jump to Action<br>
-		● Merged all Store Bot Client Info mods (Check info below)<br>
-		● Merged all Store Server Things mods (Check info below)<br>
-		● Reduced file size (We removed some obsolete modules 150 MB -> 330 KB)<br>
-		● Bug and typo fixes<br>
-		● Removed the music and discord.js fix because it is in beta fixed<br>
-		The merged actions are still usable but are located in the deprecated section. All functions are copied info the main action.
-	</p>
-	<p>
-		<h2>1.8.3: Category & Watching Netflix & Bot learned writing & Music Fix</h2>
-		● Create Category<br>
-		● Set Bot Activity (Playing, Watching, Listening & Streaming)<br>
-		● Start Bot Typing & Stop Bot Typing (Allows the bot to get the typing status)<br>
-		● Store Memory Usage<br>
-		● DBM Beta Music Stuff fix action (Check the video)<br>
-		● Update discord.js (Check the video)<br>
-		● Bug fixes<br>
-		● https://youtu.be/mrrtj5nlV58
+	<div style="float: left; width: 35%;">
+		Source Message:<br>
+		<select id="message" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
+			${data.messages[isEvent ? 1 : 0]}
+		</select>
+	</div>
+	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
+		Variable Name:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
+	</div>
+</div><br><br><br>
+<div>
+	<div style="padding-top: 8px; width: 70%;">
+		Source Info:<br>
+		<select id="info" class="round">
+			<option value="0" selected>Message edited at</option>
+			<option value="1">Message edit history</option>
+			<option value="2">Message is pinnable?</option>
+			<option value="3">Message includes @everyone mention?</option>
+			<option value="4">Messages different reactions count</option>
+			<option value="5">Messages mentioned users list</option>
+			<option value="6">Messages mentioned users count</option>
+		</select>
+	</div>
+</div><br>
+<div>
+	<div style="float: left; width: 35%;">
+		Store In:<br>
+		<select id="storage" class="round">
+			${data.variables[1]}
+		</select>
+	</div>
+	<div id="varNameContainer2" style="float: right; width: 60%;">
+		Variable Name:<br>
+		<input id="varName2" class="round" type="text"><br>
+	</div>
 </div>`
 },
 
@@ -163,7 +168,11 @@ html: function(isEvent, data) {
 // functions for the DOM elements.
 //---------------------------------------------------------------------
 
-init: function() {},
+init: function() {
+	const {glob, document} = this;
+
+	glob.messageChange(document.getElementById('message'), 'varNameContainer')
+},
 
 //---------------------------------------------------------------------
 // Action Bot Function
@@ -173,7 +182,49 @@ init: function() {},
 // so be sure to provide checks for variable existance.
 //---------------------------------------------------------------------
 
-action: function(cache) {},
+action: function(cache) {
+	const data = cache.actions[cache.index];
+	const message = parseInt(data.message);
+	const varName = this.evalMessage(data.varName, cache);
+	const info = parseInt(data.info);
+	const msg = this.getMessage(message, varName, cache);
+	if(!msg) {
+		this.callNextAction(cache);
+		return;
+	}
+	let result;
+	switch(info) {
+		case 0:
+			result = msg.editedAt;
+			break;
+		case 1:
+			result = msg.edits;
+			break;
+		case 2:
+			result = msg.pinnable;
+			break;
+		case 3:
+			result = msg.mentions.everyone;
+			break;
+		case 4:
+			result = msg.reactions.array().length;
+			break;
+		case 5:
+			result = msg.mentions.users.array();
+			break;
+		case 6:
+			result = msg.mentions.users.array().length;
+			break;
+		default:
+			break;
+	}
+	if(result !== undefined) {
+		const storage = parseInt(data.storage);
+		const varName2 = this.evalMessage(data.varName2, cache);
+		this.storeValue(result, storage, varName2, cache);
+	}
+	this.callNextAction(cache);
+},
 
 //---------------------------------------------------------------------
 // Action Bot Mod

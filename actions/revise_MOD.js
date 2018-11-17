@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Jump to Action",
+name: "Revise", //What is that?
 
 //---------------------------------------------------------------------
 // Action Section
@@ -23,8 +23,41 @@ section: "Other Stuff",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `Jump to action ${typeof data.call === 'number' ? "#" : "" + data.call}`;
+	return `Revise: "${data.reviser}"`;
 },
+
+//---------------------------------------------------------------------
+    // DBM Mods Manager Variables (Optional but nice to have!)
+    //
+    // These are variables that DBM Mods Manager uses to show information
+    // about the mods for people to see in the list.
+    //---------------------------------------------------------------------
+
+    // Who made the mod (If not set, defaults to "DBM Mods")
+    author: "EliteArtz",
+
+    // The version of the mod (Defaults to 1.0.0)
+    version: "1.8.7", //Added in 1.8.7
+
+    // A short description to show on the mod line for this mod (Must be on a single line)
+    short_description: "Revises a Message that you wan't.",
+
+	 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
+
+
+	 //---------------------------------------------------------------------
+	//---------------------------------------------------------------------
+	// Action Storage Function
+	//
+	// Stores the relevant variable info for the editor.
+	//---------------------------------------------------------------------
+
+	variableStorage: function (data, varType) {
+		const type = parseInt(data.storage);
+		if (type !== varType) return;
+		let dataType = 'Revised Result';
+		return ([data.varName2, dataType]);
+	},
 
 //---------------------------------------------------------------------
 // Action Fields
@@ -34,7 +67,7 @@ subtitle: function(data) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["call"],
+fields: ["reviser", "storage", "varName2"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -55,17 +88,25 @@ fields: ["call"],
 html: function(isEvent, data) {
 	return `
 <div>
-	<p>
-		<u>Mod Info:</u><br>
-		Created by Lasse!
-	</p>
-</div><br>
-<div>
-	<div id="varNameContainer" style="float: left; width: 60%;">
-		Jump to Action:<br>
-		<input id="call" class="round" type="text">
-	</div>
-</div><br><br><br>`
+    <p>
+        <u>Mod Info:</u><br>
+        Made by EliteArtz<br>
+    </p>
+    <div style="width: 70%;">
+        Message to Revise:<br>
+        <input id="reviser" type="text" class="round">
+    </div><br>
+    <div style="float: left; width: 35%;">
+        Store In:<br>
+        <select id="storage" class="round">
+            ${data.variables[1]}
+        </select>
+    </div>
+    <div id="varNameContainer2" style="float: right; width: 60%;">
+        Variable Name:<br>
+        <input id="varName2" class="round" type="text"><br>
+    </div>
+</div>`
 },
 
 //---------------------------------------------------------------------
@@ -86,14 +127,24 @@ init: function() {},
 // so be sure to provide checks for variable existance.
 //---------------------------------------------------------------------
 
-action: function(cache) {
-	const data = cache.actions[cache.index];
-	const val = parseInt(this.evalMessage(data.call, cache));
-	const index = Math.max(val - 1, 0);
-	if(cache.actions[index]) {
-		cache.index = index - 1;
-		this.callNextAction(cache);
-	}
+action: function (cache) {
+    const data = cache.actions[cache.index];
+    const reviseText = this.evalMessage(data.reviser, cache)
+    try {
+        let array = reviseText.split(" ");
+
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        const storage = parseInt(data.storage);
+        const varName2 = this.evalMessage(data.varName2, cache);
+        var out = array.join(" ").trim();
+        this.storeValue(out.substr(0, 1).toUpperCase() + out.substr(1), storage, varName2, cache)
+    } catch (err) {
+        console.log("ERROR!" + err.stack ? err.stack : err);
+    }
+    this.callNextAction(cache);
 },
 
 //---------------------------------------------------------------------

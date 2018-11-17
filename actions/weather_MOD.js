@@ -6,7 +6,7 @@ module.exports = {
 	// This is the name of the action displayed in the editor.
 	//---------------------------------------------------------------------
 
-	name: "Google Search",
+	name: "Weather",
 
 	//---------------------------------------------------------------------
 	// Action Section
@@ -23,8 +23,8 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function (data) {
-		const info = ['Title', 'URL', 'Snippet'];
-		return `Google Result ${info[parseInt(data.info)]}`;
+		const info = ['Temperature', 'Weather Text', 'Date', 'City', 'Country', 'Region', 'Wind Speed', 'Wind Chill', 'Wind Direction', 'Humidity', 'Pressure', 'Atmosphere Visibility', 'Sunrise Time', 'Sunset Time'];
+		return `${info[parseInt(data.info)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -41,7 +41,7 @@ module.exports = {
 	version: "1.8.7", //Added in 1.8.7
 
 	// A short description to show on the mod line for this mod (Must be on a single line)
-	short_description: "Googles the given text!.",
+	short_description: "Stores weather informations with node module.",
 
 	// If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
@@ -58,16 +58,49 @@ module.exports = {
 		const type = parseInt(data.storage);
 		if (type !== varType) return;
 		const info = parseInt(data.info);
-		let dataType = 'Unknown Google Type';
+		let dataType = 'Unknown Weather Type';
 		switch (info) {
 			case 0:
-				dataType = "Google Result Title";
+				dataType = "Temperature";
 				break;
 			case 1:
-				dataType = "Google Result URL";
+				dataType = "Weather - Text";
 				break;
 			case 2:
-				dataType = "Google Result Snippet";
+				dataType = "Date";
+				break;
+			case 3:
+				dataType = "Weather - City";
+				break;
+			case 4:
+				dataType = "Weather - Country";
+				break;
+			case 5:
+				dataType = "Weather - Region";
+				break;
+			case 6:
+				dataType = "Wind Speed";
+				break;
+			case 7:
+				dataType = "Wind Chill";
+				break;
+			case 8:
+				dataType = "Wind Direction";
+				break;
+			case 9:
+				dataType = "Atmosphere Humidity";
+				break;
+			case 10:
+				dataType = "Atmosphere Pressure";
+				break;
+			case 11:
+				dataType = "Atmosphere Visibility";
+				break;
+			case 12:
+				dataType = "Weather - Sunrise";
+				break;
+			case 13:
+				dataType = "Weather - Sunset";
 				break;
 		}
 		return ([data.varName, dataType]);
@@ -81,7 +114,7 @@ module.exports = {
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
-	fields: ["string", "info", "resultNo", "storage", "varName"],
+	fields: ["city", "degreeType", "info", "storage", "varName"],
 
 	//---------------------------------------------------------------------
 	// Command HTML
@@ -107,43 +140,48 @@ module.exports = {
 				Created by EGGSY!
 			</p>
 		</div><br>
-	<div style="width: 95%; padding-top: 8px;">
-		String(s) to Search on Google:<br>
-		<textarea id="string" rows="5" placeholder="Write something or use variables to Google search it..." style="width: 100%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
-	 </div><br>
-	 <div style="float: left; width: 45%; padding-top: 8px;">
+	<div style="float: left; width: 55%; padding-top: 8px;">
+		Source City:<br>
+		<input id="city" class="round" type="text">
+	 </div>
+	 <div style="float: right; width: 45%; padding-top: 8px;">
+	 	Degree Type:<br>
+	 	<select id="degreeType" class="round">
+			<option value="F">F</option>
+			<option value="C">C</option>
+		</select>
+  	</div><br>
+	<div style="float: left; width: 100%; padding-top: 8px;">
 		Source Info:<br>
 		<select id="info" class="round">
-			<option value="0">Result Title</option>
-			<option value="1">Result URL</option>
-			<option value="2">Result Snippet (Description)</option>
+			<option value="0">Temperature</option>
+			<option value="1">Weather Text</option>
+			<option value="2">Date</option>
+			<option value="3">City</option>
+			<option value="4">Country</option>
+			<option value="5">Region</option>
+			<option value="6">Wind Speed</option>
+			<option value="7">Wind Chill</option>
+			<option value="8">Wind Direction</option>
+			<option value="9">Humidity</option>
+			<option value="10">Pressure</option>
+			<option value="11">Atmosphere Visibility</option>
+			<option value="12">Sunrise Time</option>
+			<option value="13">Sunset Time</option>
 		</select>
-	</div>
-	<div style="float: left; width: 50%; padding-left: 10px; padding-top: 8px;">
-		Result Number:<br>
-		<select id="resultNo" class="round">
-			<option value="0">1st Result</option>
-			<option value="1">2nd Result</option>
-			<option value="2">3rd Result</option>
-			<option value="3">4th Result</option>
-			<option value="4">5th Result</option>
-			<option value="5">6th Result</option>
-			<option value="6">7th Result</option>
-			<option value="7">8th Result</option>
-			<option value="8">9th Result</option>
-			<option value="9">10th Result</option>
-		</select>
-	</div><br><br>
-		<div style="float: left; width: 43%; padding-top: 8px;">
+	</div><br>
+	<div>
+		<div style="float: left; width: 35%; padding-top: 8px;">
 			Store In:<br>
 			<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
 				${data.variables[0]}
 			</select>
 		</div>
-		<div id="varNameContainer" style="float: right; width: 53%; padding-top: 8px;">
+		<div id="varNameContainer" style="float: right; width: 60%; padding-top: 8px;">
 			Variable Name:<br>
 			<input id="varName" class="round" type="text"><br>
-		</div>`
+		</div>
+	</div><br><br>`
 	},
 
 	//---------------------------------------------------------------------
@@ -170,26 +208,59 @@ module.exports = {
 	action: function (cache) {
 		const data = cache.actions[cache.index];
 		const info = parseInt(data.info);
-		const string = this.evalMessage(data.string, cache).replace(/[\u{0080}-\u{FFFF}]/gu, ""); // The replace thing is very new, it's just replacing the invalid characters so command won't stuck when you use other languages.
-		const resultNumber = parseInt(data.resultNo);
+		const city = this.evalMessage(data.city, cache);
+		const degreeType2 = this.evalMessage(data.degreeType, cache);
 
 		// Check if everything is ok:
-		if (!string) return console.log("Please write something to Google it!");
+		if (!city) return console.log("Please specify a city to get weather informations.");
 
 		// Main code:
 		const WrexMODS = this.getWrexMods(); // as always.
-		const googleIt = WrexMODS.require('google-it');
+		const weather = WrexMODS.require('yahoo-weather'); // WrexMODS'll automatically try to install the module if you run it with CMD/PowerShell.
 
-		googleIt({ 'query': `${string}`, 'no-display': 1, 'limit': 10 }).then(results => {
+		weather(`${city}`, `${degreeType2}`).then(response => {
 			switch (info) {
 				case 0:
-					result = results[resultNumber].title;
+					result = response.item.condition.temp;
 					break;
 				case 1:
-					result = results[resultNumber].link;
+					result = response.item.condition.text;
 					break;
 				case 2:
-					result = results[resultNumber].snippet;
+					result = response.item.condition.date;
+					break;
+				case 3:
+					result = response.location.city;
+					break;
+				case 4:
+					result = response.location.country;
+					break;
+				case 5:
+					result = response.location.region;
+					break;
+				case 6:
+					result = response.wind.speed;
+					break;
+				case 7:
+					result = response.wind.chill;
+					break;
+				case 8:
+					result = response.wind.direction;
+					break;
+				case 9:
+					result = response.atmosphere.humidity;
+					break;
+				case 10:
+					result = response.atmosphere.pressure;
+					break;
+				case 11:
+					result = response.atmosphere.visibility;
+					break;
+				case 12:
+					result = response.astronomy.sunrise;
+					break;
+				case 13:
+					result = response.astronomy.sunset;
 					break;
 				default:
 					break;
@@ -198,14 +269,12 @@ module.exports = {
 				const storage = parseInt(data.storage);
 				const varName2 = this.evalMessage(data.varName, cache);
 				this.storeValue(result, storage, varName2, cache);
-				this.callNextAction(cache);
-			} else {
-				this.callNextAction(cache);
 			}
-		}).catch(e => {
-			console.log("An error in Google Search MOD: " + e);
 			this.callNextAction(cache);
-		})
+		}).catch(err => {
+			console.log("ERROR:", err)
+			this.callNextAction(cache)
+		});
 	},
 
 	//---------------------------------------------------------------------

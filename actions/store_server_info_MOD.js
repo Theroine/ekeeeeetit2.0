@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Find Message",
+name: "Store Server Things",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Find Message",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Messaging",
+section: "Server Control",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,12 +23,12 @@ section: "Messaging",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	const channels = ['Same Channel', 'Mentioned Channel', '1st Server Channel', 'Temp Variable', 'Server Variable', 'Global Variable'];
-	const info = ['Find by Content', 'Find by ID'];
-	return `${channels[parseInt(data.channel)]} - ${info[parseInt(data.info)]}`;
+	const servers = ['Current Server', 'Temp Variable', 'Server Variable', 'Global Variable'];
+	const info = ['Creation Date', 'Time to AFK', 'Is server available?', 'More than 250 members?', 'Date bot joined server', 'Channel amount', 'Emoji amount', 'Embed Links', 'DND Members Count', 'Online Members Count (fixed)', 'Offline Members Count', 'Idle Members Count', 'Total Bots Count in Server', 'Server Channel IDs', 'Server Role IDs', 'Server Member IDs', 'Server Bot Count', 'Server Human Member Count', 'Server Member Count'];
+	return `${servers[parseInt(data.server)]} - ${info[parseInt(data.info)]}`;
 },
 
-	//---------------------------------------------------------------------
+//---------------------------------------------------------------------
 	 // DBM Mods Manager Variables (Optional but nice to have!)
 	 //
 	 // These are variables that DBM Mods Manager uses to show information
@@ -36,19 +36,18 @@ subtitle: function(data) {
 	 //---------------------------------------------------------------------
 
 	 // Who made the mod (If not set, defaults to "DBM Mods")
-	 author: "Lasse",
+	 author: "Lasse, EGGSY & EliteArtz",
 
 	 // The version of the mod (Defaults to 1.0.0)
-	 version: "1.8.7", //Added in 1.8.5
+	 version: "1.8.7",
 
 	 // A short description to show on the mod line for this mod (Must be on a single line)
-	 short_description: "Finds a message by content or ID.",
+	 short_description: "Stores more Server Information",
 
 	 // If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
 
 
 	 //---------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------
 // Action Storage Function
@@ -60,7 +59,66 @@ variableStorage: function(data, varType) {
 	const type = parseInt(data.storage);
 	if(type !== varType) return;
 	const info = parseInt(data.info);
-	let dataType = 'Message';
+	let dataType = 'Text';
+	switch(info) {
+		case 0:
+			dataType = "Date";
+			break;
+		case 1:
+			dataType = "Number";
+			break;
+		case 2:
+			dataType = "Boolean";
+			break;
+		case 3:
+			dataType = "Boolean";
+			break;
+		case 4:
+			dataType = "Date";
+			break;
+		case 5:
+			dataType = "Number";
+			break;
+		case 6:
+			dataType = "Number";
+			break;
+		case 7:
+			dataType = "Boolean";
+			break;
+		case 8:
+			dataType = "Number";
+			break;
+		case 9:
+			dataType = "Number";
+			break;
+		case 10:
+			dataType = "Number";
+			break;
+		case 11:
+			dataType = "Number";
+			break;
+		case 12:
+			dataType = "Number";
+			break;
+		case 13:
+			dataType = 'Server Channel IDs';
+			break;
+		case 14:
+			dataType = 'Server Role IDs';
+			break;
+		case 15:
+			dataType = 'Server Member IDs';
+			break;
+		case 16:
+			dataType = 'Number';
+			break;
+		case 17:
+			dataType = 'Number';
+			break;
+		case 18:
+			dataType = 'Number';
+			break;
+	}
 	return ([data.varName2, dataType]);
 },
 
@@ -72,7 +130,7 @@ variableStorage: function(data, varType) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["channel", "varName", "info", "search", "storage", "varName2"],
+fields: ["server", "varName", "info", "storage", "varName2"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -92,18 +150,17 @@ fields: ["channel", "varName", "info", "search", "storage", "varName2"],
 
 html: function(isEvent, data) {
 	return `
-<div id ="wrexdiv" style="width: 550px; height: 350px; overflow-y: scroll;">
 	<div>
-	<p>
-		<u>Mod Info:</u><br>
-		Created by Lasse!
-	</p>
-</div><br>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by EGGSY, EliteArtz & Lasse!
+		</p>
+	</div><br>
 <div>
 	<div style="float: left; width: 35%;">
-		Source Channel:<br>
-		<select id="channel" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
-			${data.channels[isEvent ? 1 : 0]}
+		Source Server:<br>
+		<select id="server" class="round" onchange="glob.serverChange(this, 'varNameContainer')">
+			${data.servers[isEvent ? 1 : 0]}
 		</select>
 	</div>
 	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
@@ -112,16 +169,28 @@ html: function(isEvent, data) {
 	</div>
 </div><br><br><br>
 <div>
-	<div style="float: left; width: 70%;">
-		Find by:<br>
+	<div style="padding-top: 8px; width: 70%;">
+		Source Info:<br>
 		<select id="info" class="round">
-			<option value="0" selected>Find by Content</option>
-			<option value="1">Find by ID</option>
-		</select>
-	</div><br><br><br>
-	<div style="float: left; width: 70%;">
-		Search for:<br>
-		<input id="search" class="round" type="text"><br>
+			<option value="0" selected>Servers Creation Date</option>
+			<option value="1">Time User gets AFK</option>
+			<option value="2">Is Server available?</option>
+			<option value="4">Date Bot Joined</option>
+			<option value="5">Channel Amount</option>
+			<option value="6">Emoji Amount</option>
+			<option value="7">Embeds links?</option>
+			<option value="9">Online Members Count</option
+			<option value="11">Idle Members Count</option>
+			<option value="8">DND Members Count</option>
+			<option value="10">Offline Members Count</option>
+			<option value="13">Server Channel IDs</option>
+			<option value="14">Server Role IDs</option>
+			<option value="15">Server Member IDs</option>
+                        <option value="18">Server Member Count</option>
+			<option value="16">Server Bot Count</option>
+			<option value="17">Server Human Member Count</option>
+			<option value="12">Total Bots in Servers</option>
+			</select>
 	</div>
 </div><br>
 <div>
@@ -135,12 +204,6 @@ html: function(isEvent, data) {
 		Variable Name:<br>
 		<input id="varName2" class="round" type="text"><br>
 	</div>
-</div><br><br><br>
-<div>
-	<p>
-	<u>Note:</u><br>
-	This mod can only find messages which have been sent <b>after</b> the bot started.<br>
-	If there are multiple messages with the same content, the bot is always using the oldest message (after start).
 </div>`
 },
 
@@ -155,7 +218,7 @@ html: function(isEvent, data) {
 init: function() {
 	const {glob, document} = this;
 
-	glob.channelChange(document.getElementById('channel'), 'varNameContainer');
+	glob.serverChange(document.getElementById('server'), 'varNameContainer')
 },
 
 //---------------------------------------------------------------------
@@ -168,22 +231,72 @@ init: function() {
 
 action: function(cache) {
 	const data = cache.actions[cache.index];
-	const channel = parseInt(data.channel);
+	const server = parseInt(data.server);
 	const varName = this.evalMessage(data.varName, cache);
 	const info = parseInt(data.info);
-	const search = this.evalMessage(data.search, cache);
-	const targetChannel = this.getChannel(channel, varName, cache);
-	if(!targetChannel) {
+	const targetServer = this.getServer(server, varName, cache);
+	if(!targetServer) {
 		this.callNextAction(cache);
 		return;
 	}
 	let result;
 	switch(info) {
 		case 0:
-			result = targetChannel.messages.find("content", search);
+			result = targetServer.createdAt;
 			break;
 		case 1:
-			result = targetChannel.messages.find("id", search);
+			result = targetServer.afkTimeout;
+			break;
+		case 2:
+			result = targetServer.available;
+			break;
+		case 3:
+			result = targetServer.large; //Deprecated in v1.8.5
+			break;
+		case 4:
+			result = targetServer.joinedAt;
+			break;
+		case 5:
+			result = targetServer.channels.array().length;
+			break;
+		case 6:
+			result = targetServer.emojis.array().length;
+			break;
+		case 7:
+			result = targetServer.embedEnabled;
+			break;
+		case 8:
+			result = targetServer.members.filter(m => m.user.presence.status == "dnd").size;
+			break;
+		case 9:
+			result = targetServer.members.filter(m => m.user.presence.status == "online").size;
+			break;
+		case 10:
+			result = targetServer.members.filter(m => m.user.presence.status == "offline").size;
+			break;
+		case 11:
+			result = targetServer.members.filter(m => m.user.presence.status == "idle").size;
+			break;
+		case 12:
+			result = targetServer.members.filter(m => m.user.bot).size;
+			break;
+		case 13:
+			result = targetServer.channels.map(channels => channels.id);
+			break;
+		case 14:
+			result = targetServer.roles.map(roles => roles.id);
+			break;
+		case 15:
+			result = targetServer.members.map(members => members.id);
+			break;
+		case 16:
+			result = targetServer.members.filter(m => m.user.bot == true).size;
+			break;
+		case 17:
+			result = targetServer.members.filter(m => m.user.bot == false).size;
+			break;
+		case 18:
+			result = targetServer.memberCount; //Added by Lasse in 1.8.7
 			break;
 		default:
 			break;

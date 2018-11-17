@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Jump to Action",
+name: "Set Bot Activity",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Jump to Action",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Other Stuff",
+section: "Bot Client Control",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,9 @@ section: "Other Stuff",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `Jump to action ${typeof data.call === 'number' ? "#" : "" + data.call}`;
+
+	const activities = ["Playing", "Listening", "Watching", "Streaming Twitch"];
+	return `${activities[data.activity]} ${data.nameText}`;
 },
 
 //---------------------------------------------------------------------
@@ -34,7 +36,7 @@ subtitle: function(data) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["call"],
+fields: ["activity", "nameText", "url"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -54,18 +56,32 @@ fields: ["call"],
 
 html: function(isEvent, data) {
 	return `
-<div>
-	<p>
-		<u>Mod Info:</u><br>
-		Created by Lasse!
-	</p>
-</div><br>
-<div>
-	<div id="varNameContainer" style="float: left; width: 60%;">
-		Jump to Action:<br>
-		<input id="call" class="round" type="text">
+<div id ="wrexdiv" style="width: 550px; height: 350px; overflow-y: scroll;">
+  <div>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by Lasse!<br>
+			Edited by General Wrex<br><br>
+			Streaming Activity only works with Twitch.<br>
+			This action requires the latest discord.js version!<br>
+			Check out this video: https://youtu.be/mrrtj5nlV58<br>
+		</p>
 	</div>
-</div><br><br><br>`
+
+  <div style="float: left; width: 70%;">
+  Activity:<br>
+  <select id="activity" class="round">
+     <option value="0">Playing</option>
+     <option value="1">Listening</option>
+     <option value="2">Watching</option>
+     <option value="3">Streaming Twitch</option>
+   </select><br>
+     Name: (Shown to the right of the activity)<br>
+    <input id="nameText" class="round" type="text"><br>
+     Twitch Stream URL: (Streaming Twitch Only)<br>
+    <input id="url" class="round" type="text">
+  </div>
+</div>`
 },
 
 //---------------------------------------------------------------------
@@ -76,7 +92,8 @@ html: function(isEvent, data) {
 // functions for the DOM elements.
 //---------------------------------------------------------------------
 
-init: function() {},
+init: function() {
+},
 
 //---------------------------------------------------------------------
 // Action Bot Function
@@ -87,11 +104,50 @@ init: function() {},
 //---------------------------------------------------------------------
 
 action: function(cache) {
+	const botClient = this.getDBM().Bot.bot.user;
 	const data = cache.actions[cache.index];
-	const val = parseInt(this.evalMessage(data.call, cache));
-	const index = Math.max(val - 1, 0);
-	if(cache.actions[index]) {
-		cache.index = index - 1;
+
+	const nameText = this.evalMessage(data.nameText, cache)
+	const url = this.evalMessage(data.url, cache)
+
+
+	const activity = parseInt(data.activity);
+
+	let target;
+	if(activity >= 0) {
+		switch(activity) {
+			case 0:
+				target = 'PLAYING';
+				break;
+			case 1:
+				target = 'LISTENING';
+				break;
+			case 2:
+				target = 'WATCHING';
+				break;
+			case 3:
+				target = 'STREAMING';
+				break;
+		}
+	}
+
+	if(botClient) {
+
+		let obj;
+
+		if(nameText && activity){
+			obj = { game:{ name: nameText, type: target }}
+
+			if(url){
+				obj = { game:{ name: nameText, type: target, url: url } }
+			}
+		}
+
+		botClient.setPresence(obj).then(function() {
+			this.callNextAction(cache);
+			}.bind(this))
+		.catch(err=>console.log(err));
+	} else {
 		this.callNextAction(cache);
 	}
 },

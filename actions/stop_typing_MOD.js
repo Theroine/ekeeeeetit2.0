@@ -6,7 +6,7 @@ module.exports = {
 // This is the name of the action displayed in the editor.
 //---------------------------------------------------------------------
 
-name: "Jump to Action",
+name: "Stop Typing",
 
 //---------------------------------------------------------------------
 // Action Section
@@ -14,7 +14,7 @@ name: "Jump to Action",
 // This is the section the action will fall into.
 //---------------------------------------------------------------------
 
-section: "Other Stuff",
+section: "Deprecated",
 
 //---------------------------------------------------------------------
 // Action Subtitle
@@ -23,7 +23,9 @@ section: "Other Stuff",
 //---------------------------------------------------------------------
 
 subtitle: function(data) {
-	return `Jump to action ${typeof data.call === 'number' ? "#" : "" + data.call}`;
+	const names = ['Same Channel', 'Mentioned Channel', 'Default Channel', 'Temp Variable', 'Server Variable', 'Global Variable'];
+	const index = parseInt(data.storage);
+	return index < 3 ? `${names[index]}` : `${names[index]} - ${data.varName}`;
 },
 
 //---------------------------------------------------------------------
@@ -34,7 +36,7 @@ subtitle: function(data) {
 // are also the names of the fields stored in the action's JSON data.
 //---------------------------------------------------------------------
 
-fields: ["call"],
+fields: ["storage", "varName"],
 
 //---------------------------------------------------------------------
 // Command HTML
@@ -54,18 +56,30 @@ fields: ["call"],
 
 html: function(isEvent, data) {
 	return `
+	<div>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by Lasse!<br>
+			- Deprecated! Use "Bot Typing" instead.
+		</p>
+	</div><br>
+<div>
+	<div style="float: left; width: 35%;">
+		Channel to stop typing in:<br>
+		<select id="storage" class="round" onchange="glob.channelChange(this, 'varNameContainer')">
+			${data.channels[isEvent ? 1 : 0]}
+		</select>
+	</div>
+	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
+		Variable Name:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
+	</div>
+</div><br><br><br>
 <div>
 	<p>
-		<u>Mod Info:</u><br>
-		Created by Lasse!
+		It takes a few moments before the bot really stops typing.
 	</p>
-</div><br>
-<div>
-	<div id="varNameContainer" style="float: left; width: 60%;">
-		Jump to Action:<br>
-		<input id="call" class="round" type="text">
-	</div>
-</div><br><br><br>`
+</div><br>`
 },
 
 //---------------------------------------------------------------------
@@ -76,7 +90,11 @@ html: function(isEvent, data) {
 // functions for the DOM elements.
 //---------------------------------------------------------------------
 
-init: function() {},
+init: function() {
+	const {glob, document} = this;
+
+	glob.channelChange(document.getElementById('storage'), 'varNameContainer');
+},
 
 //---------------------------------------------------------------------
 // Action Bot Function
@@ -88,12 +106,12 @@ init: function() {},
 
 action: function(cache) {
 	const data = cache.actions[cache.index];
-	const val = parseInt(this.evalMessage(data.call, cache));
-	const index = Math.max(val - 1, 0);
-	if(cache.actions[index]) {
-		cache.index = index - 1;
-		this.callNextAction(cache);
-	}
+	const storage = parseInt(data.storage);
+	const varName = this.evalMessage(data.VarName, cache);
+	const time = parseInt(this.evalMessage(data.time, cache));
+	const channel = this.getChannel(storage, varName, cache);
+	channel.stopTyping(true);
+	this.callNextAction(cache);
 },
 
 //---------------------------------------------------------------------

@@ -6,7 +6,7 @@ module.exports = {
 	// This is the name of the action displayed in the editor.
 	//---------------------------------------------------------------------
 
-	name: "Google Search",
+	name: "Store Attachment Info",
 
 	//---------------------------------------------------------------------
 	// Action Section
@@ -14,7 +14,7 @@ module.exports = {
 	// This is the section the action will fall into.
 	//---------------------------------------------------------------------
 
-	section: "Other Stuff",
+	section: "Messaging",
 
 	//---------------------------------------------------------------------
 	// Action Subtitle
@@ -23,8 +23,8 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function (data) {
-		const info = ['Title', 'URL', 'Snippet'];
-		return `Google Result ${info[parseInt(data.info)]}`;
+		const info = ['Attachment\'s URL', 'Attachment File\'s Name', 'ttachment\'s Height', 'Attachment\'s Width', 'Attachment Message\'s Content', 'Attachment File\'s Size', 'Attachment Message\'s ID'];
+		return `${info[parseInt(data.info)]}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -38,15 +38,12 @@ module.exports = {
 	author: "EGGSY",
 
 	// The version of the mod (Defaults to 1.0.0)
-	version: "1.8.7", //Added in 1.8.7
+	version: "1.8.6",
 
 	// A short description to show on the mod line for this mod (Must be on a single line)
-	short_description: "Googles the given text!.",
+	short_description: "Stores attachment informations in messages.",
 
 	// If it depends on any other mods by name, ex: WrexMODS if the mod uses something from WrexMods
-
-
-	//---------------------------------------------------------------------
 
 	//---------------------------------------------------------------------
 	// Action Storage Function
@@ -55,22 +52,34 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	variableStorage: function (data, varType) {
-		const type = parseInt(data.storage);
+		const type = parseInt(data.storage2);
 		if (type !== varType) return;
 		const info = parseInt(data.info);
-		let dataType = 'Unknown Google Type';
+		let dataType = 'Message Attachment (Unknown) Info';
 		switch (info) {
 			case 0:
-				dataType = "Google Result Title";
+				dataType = "URL";
 				break;
 			case 1:
-				dataType = "Google Result URL";
+				dataType = "File Name";
 				break;
 			case 2:
-				dataType = "Google Result Snippet";
+				dataType = "Number";
+				break;
+			case 3:
+				dataType = "Number";
+				break;
+			case 4:
+				dataType = "Message Content";
+				break;
+			case 4:
+				dataType = "File Size";
+				break;
+			case 6:
+				dataType = "Message ID";
 				break;
 		}
-		return ([data.varName, dataType]);
+		return ([data.varName2, dataType]);
 	},
 
 	//---------------------------------------------------------------------
@@ -81,7 +90,7 @@ module.exports = {
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
-	fields: ["string", "info", "resultNo", "storage", "varName"],
+	fields: ["storage", "varName", "info", "storage2", "varName2"],
 
 	//---------------------------------------------------------------------
 	// Command HTML
@@ -101,49 +110,44 @@ module.exports = {
 
 	html: function (isEvent, data) {
 		return `
-		<div>
-			<p>
-				<u>Mod Info:</u><br>
-				Created by EGGSY!
-			</p>
-		</div><br>
-	<div style="width: 95%; padding-top: 8px;">
-		String(s) to Search on Google:<br>
-		<textarea id="string" rows="5" placeholder="Write something or use variables to Google search it..." style="width: 100%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
-	 </div><br>
-	 <div style="float: left; width: 45%; padding-top: 8px;">
-		Source Info:<br>
-		<select id="info" class="round">
-			<option value="0">Result Title</option>
-			<option value="1">Result URL</option>
-			<option value="2">Result Snippet (Description)</option>
+	<div>
+		<p>
+			<u>Mod Info:</u><br>
+			Created by EGGSY!<br>
+		</p>
+	</div><br>
+	<div style="float: left; width: 35%; padding-top: 8px;">
+		Source Message:<br>
+		<select id="storage" class="round" onchange="glob.messageChange(this, 'varNameContainer')">
+			${data.messages[isEvent ? 1 : 0]}
 		</select>
 	</div>
-	<div style="float: left; width: 50%; padding-left: 10px; padding-top: 8px;">
-		Result Number:<br>
-		<select id="resultNo" class="round">
-			<option value="0">1st Result</option>
-			<option value="1">2nd Result</option>
-			<option value="2">3rd Result</option>
-			<option value="3">4th Result</option>
-			<option value="4">5th Result</option>
-			<option value="5">6th Result</option>
-			<option value="6">7th Result</option>
-			<option value="7">8th Result</option>
-			<option value="8">9th Result</option>
-			<option value="9">10th Result</option>
-		</select>
+	<div id="varNameContainer" style="display: none; float: right; width: 60%; padding-top: 8px;">
+		Variable Name:<br>
+		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div><br><br>
-		<div style="float: left; width: 43%; padding-top: 8px;">
-			Store In:<br>
-			<select id="storage" class="round" onchange="glob.variableChange(this, 'varNameContainer')">
-				${data.variables[0]}
-			</select>
-		</div>
-		<div id="varNameContainer" style="float: right; width: 53%; padding-top: 8px;">
-			Variable Name:<br>
-			<input id="varName" class="round" type="text"><br>
-		</div>`
+<div style="float: left; width: 80%; padding-top: 8px;">
+	Source Info:<br>
+	<select id="info" class="round">
+		<option value="0">Attachment's URL</option>
+		<option value="1">Attachment File's Name</option>
+		<option value="2">Attachment's Height</option>
+		<option value="3">Attachment's Width</option>
+		<option value="4">Attachment Message's Content</option>
+		<option value="5">Attachment File's Size (KB)</option>
+		<option value="6">Attachment Message's ID</option>
+	</select>
+</div><br><br>
+	<div style="float: left; width: 35%; padding-top: 8px;">
+		Store In:<br>
+		<select id="storage2" class="round" onchange="glob.variableChange(this, 'varNameContainer2')>
+			${data.variables[0]}
+		</select>
+	</div>
+	<div id="varNameContainer2" style="float: right; width: 60%; padding-top: 8px;">
+		Variable Name:<br>
+		<input id="varName2" class="round" type="text"><br>
+	</div>`
 	},
 
 	//---------------------------------------------------------------------
@@ -155,8 +159,13 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	init: function () {
-		const { glob, document } = this;
-		glob.variableChange(document.getElementById('storage'), 'varNameContainer');
+		const {
+			glob,
+			document
+		} = this;
+
+		glob.messageChange(document.getElementById('storage'), 'varNameContainer');
+		glob.variableChange(document.getElementById('storage2'), 'varNameContainer2');
 	},
 
 	//---------------------------------------------------------------------
@@ -169,43 +178,45 @@ module.exports = {
 
 	action: function (cache) {
 		const data = cache.actions[cache.index];
+		const storage = parseInt(data.storage);
+		const varName = this.evalMessage(data.varName, cache);
+		const message = this.getMessage(storage, varName, cache);
 		const info = parseInt(data.info);
-		const string = this.evalMessage(data.string, cache).replace(/[\u{0080}-\u{FFFF}]/gu, ""); // The replace thing is very new, it's just replacing the invalid characters so command won't stuck when you use other languages.
-		const resultNumber = parseInt(data.resultNo);
 
-		// Check if everything is ok:
-		if (!string) return console.log("Please write something to Google it!");
-
-		// Main code:
-		const WrexMODS = this.getWrexMods(); // as always.
-		const googleIt = WrexMODS.require('google-it');
-
-		googleIt({ 'query': `${string}`, 'no-display': 1, 'limit': 10 }).then(results => {
+		let attachments = message.attachments.array();
+		for (let attachment of attachments) {
 			switch (info) {
 				case 0:
-					result = results[resultNumber].title;
+					result = attachment.url;
 					break;
 				case 1:
-					result = results[resultNumber].link;
+					result = attachment.filename;
 					break;
 				case 2:
-					result = results[resultNumber].snippet;
+					result = attachment.height;
+					break;
+				case 3:
+					result = attachment.width;
+					break;
+				case 4:
+					result = attachment.message.content;
+					break;
+				case 5:
+					result = Math.floor(attachment.filesize / 1000);
+					break;
+				case 6:
+					result = attachment.message.id;
 					break;
 				default:
 					break;
 			}
 			if (result !== undefined) {
-				const storage = parseInt(data.storage);
-				const varName2 = this.evalMessage(data.varName, cache);
-				this.storeValue(result, storage, varName2, cache);
-				this.callNextAction(cache);
-			} else {
-				this.callNextAction(cache);
+				const storage2 = parseInt(data.storage2);
+				const varName2 = this.evalMessage(data.varName2, cache);
+				this.storeValue(result, storage2, varName2, cache);
 			}
-		}).catch(e => {
-			console.log("An error in Google Search MOD: " + e);
 			this.callNextAction(cache);
-		})
+		}
 	},
 
 	//---------------------------------------------------------------------
@@ -217,6 +228,6 @@ module.exports = {
 	// functions you wish to overwrite.
 	//---------------------------------------------------------------------
 
-	mod: function (DBM) { }
+	mod: function (DBM) {}
 
-}; // End of module
+}; // End of module, thanks to Lasse btw!
